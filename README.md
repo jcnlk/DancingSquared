@@ -4,6 +4,8 @@
 
 ## Usage
 
+DancingSquared requires NoammAddons **1.2.6**.
+
 [![DancingSquared demonstration](docs/assets/dancing-squared-demo.jpg)](https://www.youtube.com/watch?v=5fQQJVvan1g)
 
 > [!IMPORTANT]
