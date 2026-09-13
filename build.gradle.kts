@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "2.3.21"
+    kotlin("jvm") version "2.4.20"
     id("net.fabricmc.fabric-loom") version "1.16.2"
     id("maven-publish")
     id ("org.jetbrains.kotlin.plugin.serialization") version "2.3.21"
