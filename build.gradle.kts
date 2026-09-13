@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "2.4.20"
-    id("net.fabricmc.fabric-loom") version "1.16.2"
+    id("net.fabricmc.fabric-loom") version "1.17.19"
     id("maven-publish")
     id ("org.jetbrains.kotlin.plugin.serialization") version "2.3.21"
 }
@@ -52,15 +52,20 @@ dependencies {
     implementation("com.github.Noamm9:NoammAddons:${project.property("noammaddons_version")}:${project.property("noammaddons_type")}")
 }
 
+val resourceProperties = mapOf(
+    "version" to project.version,
+    "minecraft_version" to project.property("minecraft_version"),
+    "loader_version" to project.property("loader_version"),
+    "kotlin_loader_version" to project.property("kotlin_loader_version"),
+    "noammaddons_version" to project.property("noammaddons_version")
+)
+
 tasks.processResources {
-    inputs.property("version", project.version)
-    inputs.property("minecraft_version", project.property("minecraft_version"))
-    inputs.property("loader_version", project.property("loader_version"))
-    inputs.property("noammaddons_version", project.property("noammaddons_version"))
+    inputs.properties(resourceProperties)
     filteringCharset = "UTF-8"
 
     filesMatching("fabric.mod.json") {
-        expand("version" to project.version, "minecraft_version" to project.property("minecraft_version")!!, "loader_version" to project.property("loader_version")!!, "kotlin_loader_version" to project.property("kotlin_loader_version")!!, "noammaddons_version" to project.property("noammaddons_version")!!)
+        expand(resourceProperties)
     }
 }
 
@@ -73,9 +78,13 @@ tasks.withType<KotlinCompile>().configureEach {
     compilerOptions.jvmTarget.set(JvmTarget.fromTarget(targetJavaVersion.toString()))
 }
 
+tasks.named<JavaExec>("runClient") {
+    classpath = classpath.filter { it.exists() }
+}
+
 tasks.jar {
     from("LICENSE") {
-        rename { "${it}_${project.base.archivesName.get()}" }
+        rename { "LICENSE_${base.archivesName.get()}" }
     }
 }
 
@@ -90,17 +99,17 @@ publishing {
 
 loom {
     runConfigs.named("client") {
-        isIdeConfigGenerated = true
-        vmArg("-XX:+AllowEnhancedClassRedefinition")
+        generateRunConfig.set(true)
+        jvmArguments.add("-XX:+AllowEnhancedClassRedefinition")
     }
 
     runConfigs.named("server") {
-        isIdeConfigGenerated = false
+        generateRunConfig.set(false)
     }
 }
 
 afterEvaluate {
     loom.runs.named("client") {
-        vmArg("-javaagent:${configurations.compileClasspath.get().find { "sponge-mixin" in it.name }}")
+        jvmArguments.add("-javaagent:${configurations.compileClasspath.get().find { "sponge-mixin" in it.name }}")
     }
 }
