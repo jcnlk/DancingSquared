@@ -7,7 +7,7 @@ updates:
       interval: "weekly"
     open-pull-requests-limit: 5
     groups:
-      gradle-26-1-x:
+      gradle-main:
         patterns:
           - "*"
 
@@ -18,6 +18,6 @@ updates:
       interval: "weekly"
     open-pull-requests-limit: 5
     groups:
-      actions-26-1-x:
+      actions-main:
         patterns:
           - "*"
