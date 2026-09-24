@@ -4,7 +4,7 @@
 
 ## Usage
 
-DancingSquared requires NoammAddons **1.2.8**.
+DancingSquared requires NoammAddons **1.2.9** for Minecraft **26.3**.
 
 [![DancingSquared demonstration](docs/assets/dancing-squared-demo.jpg)](https://www.youtube.com/watch?v=5fQQJVvan1g)
 

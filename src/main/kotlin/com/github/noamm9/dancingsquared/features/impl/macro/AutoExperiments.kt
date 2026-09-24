@@ -8,7 +8,6 @@ import com.github.noamm9.event.impl.TickEvent
 import com.github.noamm9.features.Feature
 import com.github.noamm9.utils.GuiUtils
 import com.github.noamm9.utils.items.ItemUtils.hasGlint
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
@@ -35,7 +34,7 @@ object AutoExperiments: Feature(name = "AutoExperiments", description = "Solves 
         }
 
         register<ContainerEvent.MouseClick> {
-            if (currentHandler != null && mc.screen is AbstractContainerScreen<*>) {
+            if (currentHandler != null) {
                 event.isCanceled = true
             }
         }

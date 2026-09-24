@@ -57,7 +57,7 @@ val resourceProperties = mapOf(
     "minecraft_version" to project.property("minecraft_version"),
     "loader_version" to project.property("loader_version"),
     "kotlin_loader_version" to project.property("kotlin_loader_version"),
-    "noammaddons_version" to project.property("noammaddons_version")
+    "noammaddons_version" to project.property("noammaddons_mod_version")
 )
 
 tasks.processResources {
