@@ -4,7 +4,7 @@
   "version": "${version}",
   "name": "DancingSquared",
   "description": "A simple addon for NoammAddons that completes the Dance Room in the Rift in Hypixel SkyBlock.",
-  "authors": ["Noamm"],
+  "authors": ["Noamm", "jcnlk"],
   "contact": {},
   "license": "CC0-1.0",
   "icon": "assets/dancingsquared/icon.png",
@@ -26,5 +26,8 @@
     "fabric-api": "*",
     "noammaddons": "${noammaddons_version}",
     "minecraft": "${minecraft_version}"
+  },
+  "conflicts": {
+    "dancingsquared": "*"
   }
 }
