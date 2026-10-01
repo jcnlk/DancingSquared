@@ -4,10 +4,7 @@
 
 ## Usage
 
-| Minecraft | NoammAddons |
-| --- | --- |
-| 26.1.2 | 1.2.8 |
-| 26.3 | 1.2.9 |
+DancingSquared requires NoammAddons **1.2.8**.
 
 [![DancingSquared demonstration](docs/assets/dancing-squared-demo.jpg)](https://www.youtube.com/watch?v=5fQQJVvan1g)
 

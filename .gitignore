@@ -44,7 +44,3 @@ replay_*.log
 /.kotlin
 *.salive
 /logs
-
-# Stonecutter generated sources
-
-versions/*/src/

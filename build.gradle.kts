@@ -8,7 +8,7 @@ plugins {
     id ("org.jetbrains.kotlin.plugin.serialization") version "2.3.21"
 }
 
-version = "${project.property("mod_version")}+${sc.current.version}"
+version = project.property("mod_version") as String
 group = project.property("maven_group") as String
 
 base {
@@ -18,6 +18,7 @@ base {
 val targetJavaVersion = 25
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(targetJavaVersion)
+    withSourcesJar()
 }
 
 repositories {
@@ -37,7 +38,7 @@ repositories {
 }
 
 dependencies {
-    minecraft("com.mojang:minecraft:${sc.current.version}")
+    minecraft("com.mojang:minecraft:${project.property("minecraft_version")}")
     implementation("net.fabricmc:fabric-loader:${project.property("loader_version")}")
     implementation("net.fabricmc:fabric-language-kotlin:${project.property("kotlin_loader_version")}")
 
@@ -53,10 +54,10 @@ dependencies {
 
 val resourceProperties = mapOf(
     "version" to project.version,
-    "minecraft_version" to sc.current.version,
+    "minecraft_version" to project.property("minecraft_version"),
     "loader_version" to project.property("loader_version"),
     "kotlin_loader_version" to project.property("kotlin_loader_version"),
-    "noammaddons_version" to project.property("noammaddons_mod_version")
+    "noammaddons_version" to project.property("noammaddons_version")
 )
 
 tasks.processResources {
@@ -82,7 +83,7 @@ tasks.named<JavaExec>("runClient") {
 }
 
 tasks.jar {
-    from(rootProject.file("LICENSE")) {
+    from("LICENSE") {
         rename { "LICENSE_${base.archivesName.get()}" }
     }
 }
