@@ -35,6 +35,7 @@ object AutoExperiments: Feature(name = "AutoExperiments", description = "Solves 
         }
 
         register<ContainerEvent.MouseClick> {
+            //$ experiment_click_guard
             if (currentHandler != null && mc.screen is AbstractContainerScreen<*>) {
                 event.isCanceled = true
             }

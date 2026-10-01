@@ -7,13 +7,15 @@ on:
       - ".github/workflows/build.yml"
       - "gradle/**"
       - "src/**"
+      - "versions/**"
       - "build.gradle.kts"
       - "gradle.properties"
       - "gradlew"
       - "LICENSE"
       - "settings.gradle.kts"
+      - "stonecutter.gradle.kts"
   push:
-    branches: ["26.1.2", "26.3"]
+    branches: ["main"]
     paths: *build-paths
 
 permissions:
@@ -38,11 +40,13 @@ jobs:
           sparse-checkout: |
             /gradle/
             /src/
+            /versions/
             /build.gradle.kts
             /gradle.properties
             /gradlew
             /LICENSE
             /settings.gradle.kts
+            /stonecutter.gradle.kts
           sparse-checkout-cone-mode: false
 
       - name: Set up JDK 25
@@ -58,13 +62,20 @@ jobs:
           cache-read-only: ${{ github.event_name == 'pull_request' }}
 
       - name: Build
-        run: ./gradlew build --build-cache
+        run: ./gradlew buildAll --build-cache
 
-      - name: Upload JAR
+      - name: Upload 26.1.2 JAR
         uses: actions/upload-artifact@v7.0.1
         with:
           path: |
-            build/libs/DancingSquared-*.jar
-            !build/libs/DancingSquared-*-sources.jar
+            versions/26.1.2/build/libs/DancingSquared-*26.1.2.jar
+          if-no-files-found: error
+          archive: false
+
+      - name: Upload 26.3 JAR
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          path: |
+            versions/26.3/build/libs/DancingSquared-*26.3.jar
           if-no-files-found: error
           archive: false
