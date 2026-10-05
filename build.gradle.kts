@@ -34,6 +34,12 @@ repositories {
             includeGroup("com.github.Noamm9")
         }
     }
+    maven("https://maven.terraformersmc.com/releases/") {
+        name = "TerraformersMC"
+        content {
+            includeGroup("com.terraformersmc")
+        }
+    }
 }
 
 dependencies {
@@ -49,6 +55,7 @@ dependencies {
     include("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
     implementation("com.github.Noamm9:NoammAddons:${project.property("noammaddons_version")}:${project.property("noammaddons_type")}")
+    compileOnly("com.terraformersmc:modmenu:${project.property("modmenu_version")}")
 }
 
 val resourceProperties = mapOf(

@@ -10,6 +10,9 @@
   "icon": "assets/dancingsquared/icon.png",
   "environment": "client",
   "entrypoints": {
+    "modmenu": [
+      "com.github.noamm9.dancingsquared.ModMenuIntegration"
+    ],
     "client": [
       {
         "value": "com.github.noamm9.dancingsquared.DancingSquared",
@@ -17,15 +20,16 @@
       }
     ]
   },
-  "mixins": [
-    "dancingsquared.mixins.json"
-  ],
+  "mixins": ["dancingsquared.mixins.json"],
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric-language-kotlin": ">=${kotlin_loader_version}",
     "fabric-api": "*",
     "noammaddons": "${noammaddons_version}",
     "minecraft": "${minecraft_version}"
+  },
+  "suggests": {
+    "modmenu": "*"
   },
   "conflicts": {
     "dancingsquared": "*"
