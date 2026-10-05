@@ -3,168 +3,183 @@ package com.github.noamm9.dancingsquared.features.impl.macro
 import com.github.noamm9.config.types.SliderSetting
 import com.github.noamm9.config.types.ToggleSetting
 import com.github.noamm9.event.impl.ContainerEvent
-import com.github.noamm9.event.impl.MainThreadPacketReceivedEvent
 import com.github.noamm9.event.impl.TickEvent
 import com.github.noamm9.features.Feature
 import com.github.noamm9.utils.GuiUtils
 import com.github.noamm9.utils.items.ItemUtils.hasGlint
-import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
-import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket
-import net.minecraft.world.item.ItemStack
-import net.minecraft.world.item.Items
-import java.util.concurrent.*
+import net.minecraft.core.registries.BuiltInRegistries
 
-object AutoExperiments: Feature(name = "AutoExperiments", description = "Solves Chronomatron and Ultrasequencer experiments.") {
+object AutoExperiments : Feature(
+    name = "AutoExperiments",
+    description = "Solves Chronomatron and Ultrasequencer experiments."
+) {
     private val clickDelay by SliderSetting("Click Delay", 200, 100, 1000, 10)
     private val delayVariety by SliderSetting("Delay Variety", 50, 0, 1000, 10)
     private val autoClose by ToggleSetting("Auto Close", true)
     private val serumCount by SliderSetting("Serum Count", 0, 0, 3, 1)
     private val getMaxXp by ToggleSetting("Get Max XP", false)
 
-    private var currentHandler: ExperimentHandler? = null
+    private val solver = Solver()
     private var lastClickTime = 0L
 
     override fun init() {
         register<ContainerEvent.Open> {
-            val title = event.screen.title.string
-            currentHandler = when {
-                title.startsWith("Chronomatron (") -> ChronomatronHandler()
-                title.startsWith("Ultrasequencer (") -> UltrasequencerHandler()
-                else -> null
-            }
+            solver.open(event.screen.title.string)
+            lastClickTime = 0L
         }
+
+        register<ContainerEvent.Close> { reset() }
 
         register<ContainerEvent.MouseClick> {
-            //$ experiment_click_guard
-            if (currentHandler != null && mc.screen is AbstractContainerScreen<*>) {
-                event.isCanceled = true
-            }
-        }
-
-        register<MainThreadPacketReceivedEvent.Post> {
-            if (currentHandler == null) return@register
-            val packet = event.packet as? ClientboundContainerSetSlotPacket ?: return@register
-
-            if (packet.containerId == mc.player?.containerMenu?.containerId) {
-                currentHandler?.onSlotUpdate(packet.slot, packet.item)
-            }
+            if (solver.active) event.isCanceled = true
         }
 
         register<TickEvent.Start> {
-            val handler = currentHandler ?: return@register
-            handler.onTick()
+            if (!solver.active) return@register
 
+            val cells = player.containerMenu.slots.map { slot ->
+                val stack = slot.item
+                Cell(
+                    slot = slot.index,
+                    itemId = if (stack.isEmpty) "" else BuiltInRegistries.ITEM.getKey(stack.item).toString(),
+                    count = if (stack.isEmpty) 0 else stack.count,
+                    foil = !stack.isEmpty && stack.hasGlint()
+                )
+            }
             val now = System.currentTimeMillis()
-            if (now - lastClickTime < getDelay()) return@register
-
-            handler.nextClick()?.let { nextSlot ->
-                GuiUtils.clickSlot(nextSlot, GuiUtils.ButtonType.MIDDLE)
+            solver.nextClick(cells, now, lastClickTime, delay())?.let { slot ->
+                GuiUtils.clickSlot(slot, GuiUtils.ButtonType.MIDDLE)
                 lastClickTime = now
             }
 
-            if (autoClose.value && handler.shouldClose()) {
-                mc.player?.closeContainer()
-                currentHandler = null
+            if (autoClose.value && solver.shouldClose(cells, chronomatronTarget(), ultrasequencerTarget())) {
+                player.closeContainer()
+                reset()
             }
         }
     }
 
-    private fun getDelay(): Long {
-        val variety = if (delayVariety.value > 0) (0 .. delayVariety.value).random() else 0
+    override fun onDisable() {
+        super.onDisable()
+        reset()
+    }
+
+    private fun reset() {
+        solver.close()
+        lastClickTime = 0L
+    }
+
+    private fun delay(): Long {
+        val variety = if (delayVariety.value == 0) 0 else (0..delayVariety.value).random()
         return clickDelay.value.toLong() + variety
     }
 
-    private abstract class ExperimentHandler {
-        var clicks = 0
-        open fun onSlotUpdate(slotIndex: Int, stack: ItemStack) = Unit
-        open fun onTick() = Unit
-        abstract fun nextClick(): Int?
-        abstract fun shouldClose(): Boolean
-    }
+    private fun chronomatronTarget() = if (getMaxXp.value) 15 else 11 - serumCount.value
 
-    private class ChronomatronHandler: ExperimentHandler() {
-        private val order = mutableListOf<Int>()
-        private var hasData = false
-        private var lastAddedSlot = - 1
-        private var closeNow = false
+    private fun ultrasequencerTarget() = if (getMaxXp.value) 20 else 9 - serumCount.value
 
-        override fun onSlotUpdate(slotIndex: Int, stack: ItemStack) {
-            val slots = mc.player?.containerMenu?.slots ?: return
-            if (slots.size <= 49) return
-            val centerItem = slots[49].item.item
+    internal data class Cell(
+        val slot: Int,
+        val itemId: String,
+        val count: Int,
+        val foil: Boolean
+    )
 
-            if (centerItem == Items.GLOWSTONE && lastAddedSlot != - 1) {
-                val lastSlotStack = slots[lastAddedSlot].item
-                if (! lastSlotStack.hasGlint()) {
-                    val target = if (getMaxXp.value) 15 else 11 - serumCount.value
-                    closeNow = order.size > target
-                    hasData = false
-                    return
+    private class Solver {
+        enum class Mode { NONE, CHRONOMATRON, ULTRASEQUENCER }
+
+        private var mode = Mode.NONE
+        private val chronomatron = mutableListOf<Int>()
+        private var chronoRevealSeen = false
+        private var chronoIndex = 0
+        private var chronoRoundComplete = false
+        private val ultrasequencer = mutableMapOf<Int, Int>()
+        private var ultraIndex = 0
+
+        val active get() = mode != Mode.NONE
+
+        fun open(title: String) {
+            mode = when {
+                title.startsWith("Chronomatron (") -> Mode.CHRONOMATRON
+                title.startsWith("Ultrasequencer (") -> Mode.ULTRASEQUENCER
+                else -> Mode.NONE
+            }
+            clear()
+        }
+
+        fun close() {
+            mode = Mode.NONE
+            clear()
+        }
+
+        fun nextClick(cells: List<Cell>, now: Long, lastClick: Long, delay: Long): Int? {
+            val canClick = now - lastClick >= delay
+            return when (mode) {
+                Mode.CHRONOMATRON -> nextChronomatron(cells, canClick)
+                Mode.ULTRASEQUENCER -> nextUltrasequencer(cells, canClick)
+                Mode.NONE -> null
+            }
+        }
+
+        fun shouldClose(cells: List<Cell>, chronoTarget: Int, ultraTarget: Int): Boolean {
+            return when (mode) {
+                Mode.CHRONOMATRON -> chronoRoundComplete && chronomatron.size > chronoTarget
+                Mode.ULTRASEQUENCER -> cell(cells)?.itemId == "minecraft:clock" &&
+                    ultraIndex >= ultrasequencer.size && ultrasequencer.size >= ultraTarget
+                Mode.NONE -> false
+            }
+        }
+
+        private fun nextChronomatron(cells: List<Cell>, canClick: Boolean): Int? {
+            val control = cell(cells)?.itemId ?: return null
+            if (control == "minecraft:glowstone") {
+                if (chronoRevealSeen && chronoIndex >= chronomatron.size) chronoRoundComplete = true
+                chronoRevealSeen = false
+                chronoIndex = 0
+                return null
+            }
+            if (control != "minecraft:clock") return null
+
+            cells.firstOrNull { it.slot in 10..43 && it.foil }?.let { reveal ->
+                if (!chronoRevealSeen) {
+                    chronomatron += reveal.slot
+                    chronoRevealSeen = true
+                    chronoRoundComplete = false
+                    chronoIndex = 0
                 }
             }
-            if (hasData || centerItem != Items.CLOCK) return
-
-            val glintedSlot = slots.find { it.index in 10 .. 43 && it.item.hasGlint() } ?: return
-
-            order.add(glintedSlot.index)
-            lastAddedSlot = glintedSlot.index
-            hasData = true
-            clicks = 0
-            lastClickTime = System.currentTimeMillis()
+            return chronomatron.getOrNull(chronoIndex)?.takeIf { canClick }?.also { chronoIndex++ }
         }
 
-        override fun nextClick(): Int? {
-            if (hasData && clicks < order.size) {
-                return order[clicks ++]
+        private fun nextUltrasequencer(cells: List<Cell>, canClick: Boolean): Int? {
+            val control = cell(cells)?.itemId ?: return null
+            if (control == "minecraft:glowstone") {
+                ultrasequencer.clear()
+                cells.asSequence()
+                    .filter { it.slot in 9..44 && isSequenceItem(it) }
+                    .sortedBy(Cell::count)
+                    .forEach { ultrasequencer[it.count - 1] = it.slot }
+                ultraIndex = 0
+                return null
             }
-            return null
+            if (control != "minecraft:clock" || !canClick) return null
+            return ultrasequencer[ultraIndex++]
         }
 
-        override fun shouldClose(): Boolean {
-            return closeNow && clicks >= order.size
-        }
-    }
-
-    private class UltrasequencerHandler: ExperimentHandler() {
-        private val order = ConcurrentHashMap<Int, Int>()
-        private var isPlayerTurn = false
-
-        override fun onTick() {
-            val slots = mc.player?.containerMenu?.slots ?: return
-            if (slots.size <= 49) return
-            val centerItem = slots[49].item.item
-
-            val wasPlayerTurn = isPlayerTurn
-            isPlayerTurn = (centerItem == Items.CLOCK)
-
-            if (! wasPlayerTurn && isPlayerTurn) {
-                lastClickTime = System.currentTimeMillis()
-                clicks = 0
-            }
-
-            if (wasPlayerTurn && ! isPlayerTurn) order.clear()
-
-            if (! isPlayerTurn && centerItem == Items.GLOWSTONE) {
-                for (slot in slots) if (slot.index in 9 .. 44) {
-                    val num = slot.item.count.takeIf { it > 0 } ?: continue
-                    val name = slot.item.hoverName.string.replace(Regex("ยง."), "")
-                    if (name.matches(Regex("\\d+"))) order[num - 1] = slot.index
-                }
-            }
+        private fun clear() {
+            chronomatron.clear()
+            chronoRevealSeen = false
+            chronoIndex = 0
+            chronoRoundComplete = false
+            ultrasequencer.clear()
+            ultraIndex = 0
         }
 
-        override fun onSlotUpdate(slotIndex: Int, stack: ItemStack) = Unit
+        private fun cell(cells: List<Cell>) = cells.firstOrNull { it.slot == 49 }
 
-        override fun nextClick(): Int? {
-            if (isPlayerTurn && clicks < order.size && order.containsKey(clicks)) {
-                return order[clicks ++]
-            }
-            return null
-        }
-
-        override fun shouldClose(): Boolean {
-            val target = if (getMaxXp.value) 20 else 9 - serumCount.value
-            return isPlayerTurn && clicks >= order.size && order.size >= target
+        private fun isSequenceItem(cell: Cell): Boolean {
+            val item = cell.itemId.substringAfter(':')
+            return item.endsWith("_dye") || item == "lapis_lazuli" || item == "bone_meal"
         }
     }
 }
