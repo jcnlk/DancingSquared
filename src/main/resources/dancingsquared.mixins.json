@@ -4,7 +4,7 @@
   "package": "com.github.noamm9.dancingsquared.mixins",
   "compatibilityLevel": "JAVA_25",
   "mixins": [
-    "MixinCategoryType"
+    "dancingsquared.mixins.MixinCategoryType"
   ],
   "client": [],
   "injectors": {

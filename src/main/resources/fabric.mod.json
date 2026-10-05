@@ -11,11 +11,11 @@
   "environment": "client",
   "entrypoints": {
     "modmenu": [
-      "com.github.noamm9.dancingsquared.ModMenuIntegration"
+      "dancingsquared.compat.ModMenuIntegration"
     ],
     "client": [
       {
-        "value": "com.github.noamm9.dancingsquared.DancingSquared",
+        "value": "dancingsquared.DancingSquared",
         "adapter": "kotlin"
       }
     ]

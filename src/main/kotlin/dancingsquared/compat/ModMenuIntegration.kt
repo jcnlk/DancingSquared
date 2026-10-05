@@ -1,4 +1,4 @@
-package com.github.noamm9.dancingsquared
+package dancingsquared.compat
 
 import com.github.noamm9.ui.clickgui.ClickGuiScreen
 import com.terraformersmc.modmenu.api.ConfigScreenFactory

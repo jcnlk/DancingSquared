@@ -1,4 +1,4 @@
-package com.github.noamm9.dancingsquared
+package dancingsquared
 
 import com.github.noamm9.NoammAddons
 import net.fabricmc.api.ClientModInitializer

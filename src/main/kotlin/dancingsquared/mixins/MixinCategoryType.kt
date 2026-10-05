@@ -1,4 +1,4 @@
-package com.github.noamm9.dancingsquared.mixins
+package dancingsquared.mixins
 
 import com.github.noamm9.NoammAddons
 import com.github.noamm9.ui.clickgui.enums.CategoryType
