@@ -3,7 +3,7 @@
     "id": "dancingsquared",
     "version": "${version}",
     "name": "DancingSquared",
-    "description": "A simple addon for NoammAddons that completes the Dance Room in the Rift in Hypixel SkyBlock.",
+    "description": "Client-side NoammAddons extension for Hypixel SkyBlock with Dance Room automation, experiment solvers, and configurable auto-clicking.",
     "authors": [
         "Noamm",
         "jcnlk"
