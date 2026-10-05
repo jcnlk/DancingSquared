@@ -1,4 +1,4 @@
-package dancingsquared.features.impl.macro
+package com.github.noamm9.dancingsquared.features.impl.macro
 
 import com.github.noamm9.config.types.SliderSetting
 import com.github.noamm9.config.types.ToggleSetting

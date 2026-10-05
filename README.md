@@ -12,7 +12,7 @@
 [![DancingSquared demonstration](docs/assets/dancing-squared-demo.jpg)](https://www.youtube.com/watch?v=5fQQJVvan1g)
 
 > [!IMPORTANT]
-> Disable **SnappyTappy** and Sodium's FPS limiter before using DancingSquared.
+> Disable "Play music" in the Skyblock Settings Menu, Sodium's FPS limiter and set Sodium's "Reduce FPS when" option to "Minimized" before using DancingSquared.
 
 ## Credits
 

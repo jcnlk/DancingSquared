@@ -5,7 +5,7 @@ plugins {
     kotlin("jvm") version "2.4.20"
     id("net.fabricmc.fabric-loom") version "1.17.19"
     id("maven-publish")
-    id ("org.jetbrains.kotlin.plugin.serialization") version "2.3.21"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.3.21"
 }
 
 version = "${project.property("mod_version")}+${sc.current.version}"
@@ -46,7 +46,6 @@ dependencies {
     minecraft("com.mojang:minecraft:${sc.current.version}")
     implementation("net.fabricmc:fabric-loader:${project.property("loader_version")}")
     implementation("net.fabricmc:fabric-language-kotlin:${project.property("kotlin_loader_version")}")
-
     implementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_version")}")
 
     runtimeOnly("me.djtheredstoner:DevAuth-fabric:1.2.2")
@@ -55,6 +54,7 @@ dependencies {
     include("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
     implementation("com.github.Noamm9:NoammAddons:${project.property("noammaddons_version")}:${project.property("noammaddons_type")}")
+    compileOnly("gg.essential:${project.property("universalcraft_artifact")}:${project.property("universalcraft_version")}")
     compileOnly("com.terraformersmc:modmenu:${project.property("modmenu_version")}")
 }
 
@@ -78,6 +78,7 @@ tasks.processResources {
 tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
     options.release.set(targetJavaVersion)
+    options.compilerArgs.addAll(listOf("-Xlint:deprecation", "-Xlint:unchecked"))
 }
 
 tasks.withType<KotlinCompile>().configureEach {
@@ -106,7 +107,12 @@ publishing {
 loom {
     runConfigs.named("client") {
         generateRunConfig.set(true)
-        jvmArguments.add("-XX:+AllowEnhancedClassRedefinition")
+        jvmArguments.addAll(
+            "-Dmixin.debug.export=true",
+            "-Ddevauth.enabled=true",
+            "-XX:+AllowEnhancedClassRedefinition",
+            "-XX:+IgnoreUnrecognizedVMOptions",
+        )
     }
 
     runConfigs.named("server") {

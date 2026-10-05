@@ -1,37 +1,45 @@
 {
-  "schemaVersion": 1,
-  "id": "dancingsquared",
-  "version": "${version}",
-  "name": "DancingSquared",
-  "description": "A simple addon for NoammAddons that completes the Dance Room in the Rift in Hypixel SkyBlock.",
-  "authors": ["Noamm", "jcnlk"],
-  "contact": {},
-  "license": "CC0-1.0",
-  "icon": "assets/dancingsquared/icon.png",
-  "environment": "client",
-  "entrypoints": {
-    "modmenu": [
-      "dancingsquared.compat.ModMenuIntegration"
+    "schemaVersion": 1,
+    "id": "dancingsquared",
+    "version": "${version}",
+    "name": "DancingSquared",
+    "description": "A simple addon for NoammAddons that completes the Dance Room in the Rift in Hypixel SkyBlock.",
+    "authors": [
+        "Noamm",
+        "jcnlk"
     ],
-    "client": [
-      {
-        "value": "dancingsquared.DancingSquared",
-        "adapter": "kotlin"
-      }
-    ]
-  },
-  "mixins": ["dancingsquared.mixins.json"],
-  "depends": {
-    "fabricloader": ">=${loader_version}",
-    "fabric-language-kotlin": ">=${kotlin_loader_version}",
-    "fabric-api": "*",
-    "noammaddons": "${noammaddons_version}",
-    "minecraft": "${minecraft_version}"
-  },
-  "suggests": {
-    "modmenu": "*"
-  },
-  "conflicts": {
-    "dancingsquared": "*"
-  }
+    "contact": {
+        "homepage": "https://github.com/jcnlk/DancingSquared",
+        "issues": "https://github.com/jcnlk/DancingSquared/issues"
+    },
+    "license": "CC0-1.0",
+    "icon": "assets/dancingsquared/icon.png",
+    "environment": "client",
+    "entrypoints": {
+        "modmenu": [
+            "com.github.noamm9.dancingsquared.compat.ModMenuIntegration"
+        ],
+        "client": [
+            {
+                "value": "com.github.noamm9.dancingsquared.DancingSquared",
+                "adapter": "kotlin"
+            }
+        ]
+    },
+    "mixins": [
+        "dancingsquared.mixins.json"
+    ],
+    "depends": {
+        "fabricloader": ">=${loader_version}",
+        "fabric-language-kotlin": ">=${kotlin_loader_version}",
+        "fabric-api": "*",
+        "noammaddons": "${noammaddons_version}",
+        "minecraft": "${minecraft_version}"
+    },
+    "suggests": {
+        "modmenu": "*"
+    },
+    "conflicts": {
+        "dancingsquared": "*"
+    }
 }

@@ -1,4 +1,4 @@
-package dancingsquared.mixins
+package com.github.noamm9.dancingsquared.mixins
 
 import com.github.noamm9.NoammAddons
 import com.github.noamm9.ui.clickgui.enums.CategoryType
@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.Mixin
 import org.spongepowered.asm.mixin.injection.At
 import java.lang.invoke.MethodHandles
 import java.lang.invoke.MethodType
-import java.util.Arrays
+import java.util.*
 
 @Mixin(CategoryType::class)
 abstract class MixinCategoryType {
