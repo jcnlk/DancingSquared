@@ -1,4 +1,4 @@
-package com.github.noamm9.dancingsquared.features.impl.macro
+package com.github.noamm9.dancingsquared.features.impl.addon
 
 import com.github.noamm9.config.types.SliderSetting
 import com.github.noamm9.config.types.ToggleSetting
@@ -125,7 +125,8 @@ object AutoExperiments : Feature(
             return when (mode) {
                 Mode.CHRONOMATRON -> chronoRoundComplete && chronomatron.size > chronoTarget
                 Mode.ULTRASEQUENCER -> cell(cells)?.itemId == "minecraft:clock" &&
-                    ultraIndex >= ultrasequencer.size && ultrasequencer.size >= ultraTarget
+                        ultraIndex >= ultrasequencer.size && ultrasequencer.size >= ultraTarget
+
                 Mode.NONE -> false
             }
         }

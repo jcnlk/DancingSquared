@@ -1,4 +1,4 @@
-package com.github.noamm9.dancingsquared.features.impl.macro
+package com.github.noamm9.dancingsquared.features.impl.addon
 
 import com.github.noamm9.commands.CommandBuilder
 import com.github.noamm9.config.ConfigManager
@@ -22,7 +22,7 @@ import gg.essential.universal.UMinecraft
 import kotlinx.coroutines.*
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource
 import net.minecraft.world.phys.BlockHitResult
-import java.util.Random
+import java.util.*
 import kotlin.time.Duration.Companion.milliseconds
 
 // https://github.com/jcnlk/quoi/blob/multiversion/src/main/kotlin/quoi/module/impl/general/AutoClicker.kt
