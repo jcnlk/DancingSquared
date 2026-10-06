@@ -22,7 +22,7 @@ Ultrasequencer experiments, and mouse clicking.
 
 | Minecraft | DancingSquared | NoammAddons |
 |-----------|----------------|-------------|
-| 26.1.2    | 1.2.8          | 1.2.9       |
+| 26.1.2    | 1.2.9          | 1.2.9       |
 | 26.2      | 1.2.9          | 1.2.9       |
 | 26.3      | 1.2.9          | 1.2.9       |
 
