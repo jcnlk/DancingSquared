@@ -63,6 +63,7 @@ jobs:
           name: DancingSquared-build-artifacts
           path: |
             versions/26.1.2/build/libs/DancingSquared-*26.1.2.jar
+            versions/26.2/build/libs/DancingSquared-*26.2.jar
             versions/26.3/build/libs/DancingSquared-*26.3.jar
           if-no-files-found: error
           compression-level: 0
