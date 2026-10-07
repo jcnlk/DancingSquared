@@ -21,7 +21,7 @@ abstract class MixinCategoryType {
                     CategoryType::class.java,
                     MethodType.methodType(Void.TYPE, String::class.java, Int::class.javaPrimitiveType)
                 )
-                val category = constructor.invokeExact("MACRO", values.size) as CategoryType
+                val category = constructor.invokeExact("ADDON", values.size) as CategoryType
 
                 val extendedValues = Arrays.copyOf(values, values.size + 1)
                 extendedValues[values.size] = category
