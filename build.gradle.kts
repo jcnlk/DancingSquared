@@ -5,7 +5,7 @@ plugins {
     kotlin("jvm") version "2.4.20"
     id("net.fabricmc.fabric-loom") version "1.17.19"
     id("maven-publish")
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.3.21"
+    id("org.jetbrains.kotlin.plugin.serialization") version "2.4.10"
 }
 
 version = "${project.property("mod_version")}+${sc.current.version}"
