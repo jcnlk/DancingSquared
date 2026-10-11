@@ -65,7 +65,7 @@ jobs:
         run: ./gradlew buildAll --build-cache
 
       - name: Upload 26.1.2 JAR
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           path: |
             versions/26.1.2/build/libs/DancingSquared-*26.1.2.jar
@@ -73,7 +73,7 @@ jobs:
           archive: false
 
       - name: Upload 26.2 JAR
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           path: |
             versions/26.2/build/libs/DancingSquared-*26.2.jar
@@ -81,7 +81,7 @@ jobs:
           archive: false
 
       - name: Upload 26.3 JAR
-        uses: actions/upload-artifact@v7.0.1
+        uses: actions/upload-artifact@v7.0.2
         with:
           path: |
             versions/26.3/build/libs/DancingSquared-*26.3.jar
