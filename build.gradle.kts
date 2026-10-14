@@ -28,10 +28,16 @@ repositories {
             includeGroup("gg.essential")
         }
     }
-    maven("https://jitpack.io") {
-        name = "JitPack"
+    ivy("https://github.com/Noamm9/NoammAddons/releases/download") {
+        name = "NoammAddonsReleases"
+        patternLayout {
+            artifact("[revision]/[artifact]-[revision](-[classifier]).[ext]")
+        }
+        metadataSources {
+            artifact()
+        }
         content {
-            includeGroup("com.github.Noamm9")
+            includeModule("com.github.Noamm9", "NoammAddons")
         }
     }
     maven("https://maven.terraformersmc.com/releases/") {
@@ -53,7 +59,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
     include("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
-    implementation("com.github.Noamm9:NoammAddons:${project.property("noammaddons_version")}:${project.property("noammaddons_type")}")
+    implementation("com.github.Noamm9:NoammAddons:${project.property("noammaddons_version")}:${sc.current.version}-${project.property("noammaddons_type")}@jar")
     compileOnly("gg.essential:${project.property("universalcraft_artifact")}:${project.property("universalcraft_version")}")
     compileOnly("com.terraformersmc:modmenu:${project.property("modmenu_version")}")
 }
