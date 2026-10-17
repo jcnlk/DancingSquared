@@ -76,7 +76,7 @@ object AutoExperiments : Feature(
 
     private fun chronomatronTarget() = if (getMaxXp.value) 15 else 11 - serumCount.value
 
-    private fun ultrasequencerTarget() = if (getMaxXp.value) 20 else 9 - serumCount.value
+    private fun ultrasequencerTarget() = if (getMaxXp.value) 20 else 8 - serumCount.value
 
     internal data class Cell(
         val slot: Int,
