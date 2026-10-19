@@ -4,10 +4,8 @@ on:
   push:
     branches:
       - "main"
-    paths: &build-paths
-      - ".github/workflows/**"
-      - ".forgejo/workflows/**"
-      - "renovate.json"
+    paths:
+      - ".forgejo/workflows/build.yml"
       - "gradle/**"
       - "src/**"
       - "versions/**"
@@ -18,7 +16,8 @@ on:
       - "settings.gradle.kts"
       - "stonecutter.gradle.kts"
   pull_request:
-    paths: *build-paths
+    # This required merge check must also run for documentation-only PRs.
+    branches: [main]
 
 permissions:
   contents: read
@@ -58,7 +57,7 @@ jobs:
           GITHUB_TOKEN: ""
 
       - name: Upload Build Artifacts
-        if: ${{ !cancelled() && (forgejo.event_name != 'pull_request' || failure()) }}
+        if: ${{ success() && forgejo.event_name == 'push' && forgejo.ref == 'refs/heads/main' }}
         uses: https://code.forgejo.org/forgejo/upload-artifact@16871d9e8cfcf27ff31822cac382bbb5450f1e1e # v4
         with:
           name: DancingSquared-build-artifacts

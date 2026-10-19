@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths: &workflow-paths
       - ".github/workflows/**"
+      - ".forgejo/workflows/**"
   pull_request:
     branches: [main]
     paths: *workflow-paths
@@ -32,9 +33,32 @@ jobs:
         with:
           args: -color
 
-      - name: Audit Workflow Security
+      - name: Lint Forgejo Workflows
+        uses: docker://rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667
+        with:
+          entrypoint: /bin/sh
+          # The runner parses args with .NET rules, so quote the script with double quotes.
+          # Translate Forgejo's context alias and action URL syntax for actionlint.
+          # Security auditing below reads the original files.
+          args: >-
+            -ec "
+            for workflow in .forgejo/workflows/*.yml .forgejo/workflows/*.yaml; do
+              [ -f \"$workflow\" ] || continue;
+              sed -e \"s#uses: https://code.forgejo.org/#uses: #\" -e \"s/forgejo\\./github./g\" \"$workflow\" | actionlint -color -stdin-filename \"$workflow\" - || exit \"$?\";
+            done"
+
+      - name: Audit GitHub Workflow Security
         uses: zizmorcore/zizmor-action@85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e # v0.7.1
         with:
           inputs: .github/workflows
+          advanced-security: false
+          annotations: true
+
+      - name: Audit Forgejo Workflow Security
+        uses: zizmorcore/zizmor-action@85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e # v0.7.1
+        with:
+          # Directory discovery skips .forgejo; GitHub's online audits cannot resolve Forgejo action URLs.
+          inputs: .forgejo/workflows/*.y*ml
+          online-audits: false
           advanced-security: false
           annotations: true
