@@ -1,0 +1,35 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: en-US
+tone_instructions: "Keep feedback concise and actionable. Prioritize correctness, security, and Minecraft version compatibility. Explain the concrete failure behind each finding."
+
+reviews:
+  profile: chill
+  request_changes_workflow: false
+  collapse_walkthrough: true
+  auto_review:
+    enabled: true
+    auto_incremental_review: true
+    auto_pause_after_reviewed_commits: 0
+    drafts: false
+    ignore_usernames: []
+  pre_merge_checks:
+    docstrings:
+      mode: "off"
+  path_instructions:
+    - path: "src/**"
+      instructions: |
+        This is a Fabric client addon for NoammAddons targeting Minecraft 26.1.2, 26.2, and 26.3 through Stonecutter.
+        Interpret Stonecutter condition comments and the configuration in stonecutter.gradle.kts before evaluating version-specific code.
+        Check NoammAddons API compatibility, event consumption, client-thread access, and behavior across the supported Minecraft targets.
+    - path: "**/gradle.properties"
+      instructions: |
+        Review dependency updates against each target's Minecraft version, Fabric API suffix, Mod Menu major, and Fabric Kotlin runtime.
+        Keep NoammAddons release classifiers and mod version requirements in sync. UniversalCraft artifacts must match each Minecraft target.
+    - path: "**/*.gradle.kts"
+      instructions: |
+        Account for Stonecutter preprocessing, Java 25, and the shared source tree.
+        Verify that buildAll still produces a separate JAR for each of the three Minecraft targets in build/libs/<target>/.
+    - path: ".github/workflows/**"
+      instructions: |
+        Review event and path filters, token permissions, cache trust, and pinned action references.
+        The Build workflow distributes downloadable JARs through GitHub Actions artifacts.

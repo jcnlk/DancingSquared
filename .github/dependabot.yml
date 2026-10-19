@@ -1,23 +1,20 @@
 version: 2
+# Renovate handles dependency PRs, including security fixes.
 updates:
   - package-ecosystem: "gradle"
     directory: "/"
-    target-branch: "main"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 5
-    groups:
-      gradle-main:
-        patterns:
-          - "*"
+    open-pull-requests-limit: 0
+    ignore:
+      - dependency-name: "*"
+        versions: [">= 0"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
-    target-branch: "main"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 5
-    groups:
-      actions-main:
-        patterns:
-          - "*"
+    open-pull-requests-limit: 0
+    ignore:
+      - dependency-name: "*"
+        versions: [">= 0"]

@@ -1,0 +1,134 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended", "helpers:pinGitHubActionDigests", ":semanticCommits"],
+  "forkProcessing": "enabled",
+  "baseBranchPatterns": ["main"],
+  "enabledManagers": ["gradle", "gradle-wrapper", "github-actions", "custom.regex"],
+  "dependencyDashboard": true,
+  "schedule": ["* 0-11 * * 1"],
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2,
+  "labels": ["dependencies"],
+  "semanticCommitType": "chore",
+  "semanticCommitScope": "deps",
+  "automerge": false,
+  "minimumReleaseAge": "3 days",
+  "minimumReleaseAgeBehaviour": "timestamp-optional",
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/(^|/)gradle\\.properties$/"],
+      "matchStrings": [
+        "(?:^|\\n)# renovate: datasource=(?<datasource>maven) depName=(?<depName>[^\\s]+) registryUrl=(?<registryUrl>https://[^\\s]+)\\r?\\n[a-z_]+_version=(?<currentValue>[^\\s]+)"
+      ],
+      "versioningTemplate": "maven"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/workflows/renovate-validation\\.yml$/"],
+      "matchStrings": [
+        "# renovate: datasource=npm depName=renovate\\r?\\n\\s+RENOVATE_VERSION: \"(?<currentValue>[^\"]+)\""
+      ],
+      "datasourceTemplate": "npm",
+      "depNameTemplate": "renovate",
+      "versioningTemplate": "npm"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Annotated properties are owned by the custom manager",
+      "matchManagers": ["gradle"],
+      "matchFileNames": ["gradle.properties", "versions/**/gradle.properties"],
+      "enabled": false
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["minor", "patch", "pin", "pinDigest", "digest"],
+      "groupName": "CI actions"
+    },
+    {
+      "matchManagers": ["gradle", "gradle-wrapper", "custom.regex"],
+      "matchDatasources": ["maven", "gradle-version"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "Gradle dependencies"
+    },
+    {
+      "description": "Review the Kotlin compiler, serialization plugin and Fabric Kotlin runtime together",
+      "matchPackageNames": ["org.jetbrains.kotlin:kotlin-gradle-plugin", "org.jetbrains.kotlin:kotlin-serialization", "net.fabricmc:fabric-language-kotlin"],
+      "groupName": "Kotlin",
+      "separateMajorMinor": false
+    },
+    {
+      "description": "Minecraft ports and the Minecraft-provided native ABI need manual changes",
+      "matchPackageNames": ["com.mojang:minecraft", "org.lwjgl:*"],
+      "enabled": false
+    },
+    {
+      "description": "NoammAddons release classifiers and required mod versions must be updated together manually",
+      "matchPackageNames": ["com.github.Noamm9:NoammAddons"],
+      "enabled": false
+    },
+    {
+      "description": "Keep the Java toolchain on the version required by these Minecraft targets",
+      "matchDatasources": ["java-version"],
+      "enabled": false
+    },
+    {
+      "description": "Fabric API must match each Minecraft target",
+      "matchPackageNames": ["net.fabricmc.fabric-api:fabric-api"],
+      "matchFileNames": ["versions/26.1.2/gradle.properties"],
+      "allowedVersions": "/\\+26\\.1\\.2$/"
+    },
+    {
+      "matchPackageNames": ["net.fabricmc.fabric-api:fabric-api"],
+      "matchFileNames": ["versions/26.2/gradle.properties"],
+      "allowedVersions": "/\\+26\\.2$/"
+    },
+    {
+      "matchPackageNames": ["net.fabricmc.fabric-api:fabric-api"],
+      "matchFileNames": ["versions/26.3/gradle.properties"],
+      "allowedVersions": "/\\+26\\.3$/"
+    },
+    {
+      "description": "Mod Menu majors follow Minecraft releases, including their prereleases",
+      "matchPackageNames": ["com.terraformersmc:modmenu"],
+      "ignoreUnstable": false
+    },
+    {
+      "matchPackageNames": ["com.terraformersmc:modmenu"],
+      "matchFileNames": ["versions/26.1.2/gradle.properties"],
+      "allowedVersions": "/^18\\./"
+    },
+    {
+      "matchPackageNames": ["com.terraformersmc:modmenu"],
+      "matchFileNames": ["versions/26.2/gradle.properties"],
+      "allowedVersions": "/^20\\./"
+    },
+    {
+      "matchPackageNames": ["com.terraformersmc:modmenu"],
+      "matchFileNames": ["versions/26.3/gradle.properties"],
+      "allowedVersions": "/^21\\./"
+    },
+    {
+      "description": "Preserve Forgejo runner compatibility",
+      "matchManagers": ["github-actions"],
+      "matchFileNames": [".forgejo/workflows/**"],
+      "matchPackageNames": ["actions/setup-java"],
+      "allowedVersions": "/^v?5\\./"
+    },
+    {
+      "description": "Forgejo artifact uploads require the v4 protocol",
+      "matchManagers": ["github-actions"],
+      "matchFileNames": [".forgejo/workflows/**"],
+      "matchPackageNames": ["forgejo/upload-artifact"],
+      "allowedVersions": "/^v?4(?:\\.|$)/"
+    },
+    {
+      "description": "The Renovate validator currently requires Node 24",
+      "matchManagers": ["github-actions"],
+      "matchFileNames": [".github/workflows/renovate-validation.yml"],
+      "matchPackageNames": ["node"],
+      "allowedVersions": "/^24(?:\\.|$)/"
+    }
+  ]
+}

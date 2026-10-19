@@ -6,6 +6,16 @@ pluginManagement {
 
         gradlePluginPortal()
     }
+
+    val kotlinVersion = providers.gradleProperty("kotlin_version").get()
+    val serializationVersion = providers.gradleProperty("kotlin_serialization_version").get()
+    val loomVersion = providers.gradleProperty("loom_version").get()
+
+    plugins {
+        kotlin("jvm") version kotlinVersion
+        id("org.jetbrains.kotlin.plugin.serialization") version serializationVersion
+        id("net.fabricmc.fabric-loom") version loomVersion
+    }
 }
 
 plugins {

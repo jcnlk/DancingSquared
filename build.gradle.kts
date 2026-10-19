@@ -2,10 +2,10 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "2.4.20"
-    id("net.fabricmc.fabric-loom") version "1.17.19"
+    kotlin("jvm")
+    id("net.fabricmc.fabric-loom")
     id("maven-publish")
-    id("org.jetbrains.kotlin.plugin.serialization") version "2.4.10"
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 version = "${project.property("mod_version")}+${sc.current.version}"
@@ -54,25 +54,30 @@ dependencies {
     implementation("net.fabricmc:fabric-language-kotlin:${project.property("kotlin_loader_version")}")
     implementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_version")}")
 
-    runtimeOnly("me.djtheredstoner:DevAuth-fabric:1.2.2")
+    runtimeOnly("me.djtheredstoner:DevAuth-fabric:${project.property("devauth_version")}")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
-    include("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${project.property("serialization_json_version")}")
+    include("org.jetbrains.kotlinx:kotlinx-serialization-json:${project.property("serialization_json_version")}")
 
-    implementation("com.github.Noamm9:NoammAddons:${project.property("noammaddons_version")}:${sc.current.version}-${project.property("noammaddons_type")}@jar")
+    implementation(
+        "com.github.Noamm9:NoammAddons:${project.property("noammaddons_version")}:${sc.current.version}-${
+            project.property(
+                "noammaddons_type"
+            )
+        }@jar"
+    )
     compileOnly("gg.essential:${project.property("universalcraft_artifact")}:${project.property("universalcraft_version")}")
     compileOnly("com.terraformersmc:modmenu:${project.property("modmenu_version")}")
 }
 
-val resourceProperties = mapOf(
-    "version" to project.version,
-    "minecraft_version" to sc.current.version,
-    "loader_version" to project.property("loader_version"),
-    "kotlin_loader_version" to project.property("kotlin_loader_version"),
-    "noammaddons_version" to project.property("noammaddons_mod_version")
-)
-
 tasks.processResources {
+    val resourceProperties = mapOf(
+        "version" to project.version,
+        "minecraft_version" to sc.current.version,
+        "loader_version" to project.property("loader_version"),
+        "kotlin_loader_version" to project.property("kotlin_loader_version"),
+        "noammaddons_version" to project.property("noammaddons_mod_version")
+    )
     inputs.properties(resourceProperties)
     filteringCharset = "UTF-8"
 
@@ -88,6 +93,7 @@ tasks.withType<JavaCompile>().configureEach {
 }
 
 tasks.withType<KotlinCompile>().configureEach {
+    inputs.property("stonecutterUsesSharedSources", sc.current.isActive)
     compilerOptions.jvmTarget.set(JvmTarget.fromTarget(targetJavaVersion.toString()))
 }
 
@@ -97,8 +103,16 @@ tasks.named<JavaExec>("runClient") {
 
 tasks.jar {
     from(rootProject.file("LICENSE")) {
-        rename { "LICENSE_${base.archivesName.get()}" }
+        rename("LICENSE", "LICENSE_${base.archivesName.get()}")
     }
+}
+
+tasks.register<Sync>("collectJar") {
+    group = "build"
+    description = "Collects this Minecraft version's JAR in the root build/libs directory."
+    outputs.upToDateWhen { false }
+    from(tasks.jar.flatMap { it.archiveFile })
+    into(rootProject.layout.buildDirectory.dir("libs/${sc.current.project}"))
 }
 
 publishing {
