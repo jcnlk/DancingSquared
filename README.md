@@ -45,7 +45,7 @@ Ultrasequencer experiments, and mouse clicking.
 
 ## Support
 
-For help, contact `jcnlk` on Discord or open an [issue](https://github.com/jcnlk/DancingSquared/issues).
+For help, contact `jcnlk` on Discord or open an [issue](https://github.com/jcnlk/HateFrance/issues).
 
 ## Credits
 
