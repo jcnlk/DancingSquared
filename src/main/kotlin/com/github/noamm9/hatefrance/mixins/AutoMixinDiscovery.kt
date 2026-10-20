@@ -1,4 +1,4 @@
-package com.github.noamm9.dancingsquared.mixins
+package com.github.noamm9.hatefrance.mixins
 
 import net.fabricmc.api.EnvType
 import net.fabricmc.loader.api.FabricLoader

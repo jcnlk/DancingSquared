@@ -22,7 +22,7 @@ plugins {
     id("dev.kikugie.stonecutter") version "0.9.8"
 }
 
-rootProject.name = "DancingSquared"
+rootProject.name = "HateFrance"
 
 stonecutter {
     create(rootProject) {

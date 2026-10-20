@@ -1,8 +1,8 @@
 {
     "schemaVersion": 1,
-    "id": "dancingsquared",
+    "id": "hatefrance",
     "version": "${version}",
-    "name": "DancingSquared",
+    "name": "HateFrance",
     "description": "Client-side NoammAddons extension for Hypixel SkyBlock with Dance Room automation, experiment solvers, and configurable auto-clicking.",
     "authors": [
         "Noamm",
@@ -13,21 +13,21 @@
         "issues": "https://github.com/jcnlk/DancingSquared/issues"
     },
     "license": "CC0-1.0",
-    "icon": "assets/dancingsquared/icon.png",
+    "icon": "assets/hatefrance/icon.png",
     "environment": "client",
     "entrypoints": {
         "modmenu": [
-            "com.github.noamm9.dancingsquared.compat.ModMenuIntegration"
+            "com.github.noamm9.hatefrance.compat.ModMenuIntegration"
         ],
         "client": [
             {
-                "value": "com.github.noamm9.dancingsquared.DancingSquared",
+                "value": "com.github.noamm9.hatefrance.HateFrance",
                 "adapter": "kotlin"
             }
         ]
     },
     "mixins": [
-        "dancingsquared.mixins.json"
+        "hatefrance.mixins.json"
     ],
     "depends": {
         "fabricloader": ">=${loader_version}",
@@ -39,7 +39,7 @@
     "suggests": {
         "modmenu": "*"
     },
-    "conflicts": {
+    "breaks": {
         "dancingsquared": "*"
     }
 }

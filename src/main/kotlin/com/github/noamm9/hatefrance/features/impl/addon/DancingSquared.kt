@@ -1,4 +1,4 @@
-package com.github.noamm9.dancingsquared.features.impl.addon
+package com.github.noamm9.hatefrance.features.impl.addon
 
 import com.github.noamm9.NoammAddons
 import com.github.noamm9.event.impl.PacketEvent

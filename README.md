@@ -1,12 +1,12 @@
-# DancingSquared
+# HateFrance
 
 > A client-side Fabric addon for NoammAddons that automates selected Hypixel SkyBlock tasks.
 
-DancingSquared includes automation for the Rift Dance Room, the Chronomatron and
+HateFrance includes automation for the Rift Dance Room, the Chronomatron and
 Ultrasequencer experiments, and mouse clicking.
 
 > [!IMPORTANT]
-> Before using DancingSquared, disable **Play music** in the SkyBlock settings.
+> Before using HateFrance, disable **Play music** in the SkyBlock settings.
 > Disable Sodium's FPS limiter and set Sodium's **Reduce FPS when** option to **Minimized**.
 
 <details>
@@ -20,7 +20,7 @@ Ultrasequencer experiments, and mouse clicking.
 
 ## Compatibility
 
-| Minecraft | DancingSquared | NoammAddons |
+| Minecraft | HateFrance | NoammAddons |
 |-----------|----------------|-------------|
 | 26.1.2    | 1.3.1          | 1.3.1       |
 | 26.2      | 1.3.1          | 1.3.1       |
@@ -33,13 +33,13 @@ Ultrasequencer experiments, and mouse clicking.
    [Fabric Language Kotlin](https://modrinth.com/mod/fabric-language-kotlin),
    and the matching [NoammAddons](https://github.com/Noamm9/NoammAddons)
    version to your `mods` folder.
-3. Add the matching DancingSquared jar.
+3. Add the matching HateFrance jar.
 4. Open the NoammAddons configuration screen. [Mod Menu](https://modrinth.com/mod/modmenu)
    adds a direct entry for it.
 
 ## Configuration
 
-[Watch the DancingSquared demonstration on YouTube](https://www.youtube.com/watch?v=5fQQJVvan1g)
+[Watch the HateFrance demonstration on YouTube](https://www.youtube.com/watch?v=5fQQJVvan1g)
 
 ## Support
 
@@ -48,4 +48,4 @@ For help, contact `jcnlk` on Discord or open an [issue](https://github.com/jcnlk
 ## Credits
 
 The original mod and Dance Room implementation were created by [Noamm](https://github.com/Noamm9).
-DancingSquared is released under [CC0 1.0](LICENSE).
+HateFrance is released under [CC0 1.0](LICENSE).

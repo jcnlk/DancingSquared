@@ -1,9 +1,9 @@
 {
     "required": true,
     "minVersion": "0.8",
-    "package": "com.github.noamm9.dancingsquared.mixins",
+    "package": "com.github.noamm9.hatefrance.mixins",
     "compatibilityLevel": "JAVA_25",
-    "plugin": "com.github.noamm9.dancingsquared.mixins.AutoMixinDiscovery",
+    "plugin": "com.github.noamm9.hatefrance.mixins.AutoMixinDiscovery",
     "injectors": {
         "defaultRequire": 1
     },

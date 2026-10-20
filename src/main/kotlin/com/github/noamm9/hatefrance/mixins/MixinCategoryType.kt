@@ -1,4 +1,4 @@
-package com.github.noamm9.dancingsquared.mixins
+package com.github.noamm9.hatefrance.mixins
 
 import com.github.noamm9.NoammAddons
 import com.github.noamm9.ui.clickgui.enums.CategoryType
@@ -29,7 +29,7 @@ abstract class MixinCategoryType {
                 setStaticField(unsafe, "\$VALUES", extendedValues)
                 setStaticField(unsafe, "\$ENTRIES", enumEntries(extendedValues))
             } catch (exception: Exception) {
-                NoammAddons.logger.error("Failed to add the DancingSquared category", exception)
+                NoammAddons.logger.error("Failed to add the HateFrance category", exception)
             }
         }
 

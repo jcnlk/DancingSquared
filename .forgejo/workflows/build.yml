@@ -60,8 +60,8 @@ jobs:
         if: ${{ success() && forgejo.event_name == 'push' && forgejo.ref == 'refs/heads/main' }}
         uses: https://code.forgejo.org/forgejo/upload-artifact@16871d9e8cfcf27ff31822cac382bbb5450f1e1e # v4
         with:
-          name: DancingSquared-build-artifacts
-          path: build/libs/*/DancingSquared-*.jar
+          name: HateFrance-build-artifacts
+          path: build/libs/*/HateFrance-*.jar
           if-no-files-found: error
           compression-level: 0
           retention-days: 14
