@@ -1,5 +1,7 @@
 # HateFrance
 
+Formerly known as **DancingSquared**.
+
 > A client-side Fabric addon for NoammAddons that automates selected Hypixel SkyBlock tasks.
 
 HateFrance includes automation for the Rift Dance Room, the Chronomatron and
