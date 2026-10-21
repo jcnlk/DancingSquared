@@ -53,8 +53,8 @@
       "groupName": "Gradle dependencies"
     },
     {
-      "description": "Review the Kotlin compiler, serialization plugin and Fabric Kotlin runtime together",
-      "matchPackageNames": ["org.jetbrains.kotlin:kotlin-gradle-plugin", "org.jetbrains.kotlin:kotlin-serialization", "net.fabricmc:fabric-language-kotlin"],
+      "description": "Review the Kotlin compiler and Fabric Kotlin runtime together",
+      "matchPackageNames": ["org.jetbrains.kotlin:kotlin-gradle-plugin", "net.fabricmc:fabric-language-kotlin"],
       "groupName": "Kotlin",
       "separateMajorMinor": false
     },

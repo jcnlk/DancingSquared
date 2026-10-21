@@ -5,7 +5,6 @@ plugins {
     kotlin("jvm")
     id("net.fabricmc.fabric-loom")
     id("maven-publish")
-    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 version = "${project.property("mod_version")}+${sc.current.version}"
@@ -55,9 +54,6 @@ dependencies {
     implementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_version")}")
 
     runtimeOnly("me.djtheredstoner:DevAuth-fabric:${project.property("devauth_version")}")
-
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${project.property("serialization_json_version")}")
-    include("org.jetbrains.kotlinx:kotlinx-serialization-json:${project.property("serialization_json_version")}")
 
     implementation(
         "com.github.Noamm9:NoammAddons:${project.property("noammaddons_version")}:${sc.current.version}-${
