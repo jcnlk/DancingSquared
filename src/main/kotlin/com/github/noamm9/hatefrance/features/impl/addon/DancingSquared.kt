@@ -1,7 +1,7 @@
 package com.github.noamm9.hatefrance.features.impl.addon
 
 import com.github.noamm9.NoammAddons
-import com.github.noamm9.event.impl.PacketEvent
+import com.github.noamm9.event.impl.MainThreadPacketReceivedEvent
 import com.github.noamm9.event.impl.TickEvent
 import com.github.noamm9.event.impl.WorldChangeEvent
 import com.github.noamm9.features.Feature
@@ -9,12 +9,10 @@ import com.github.noamm9.utils.ChatUtils
 import com.github.noamm9.utils.ChatUtils.unformattedText
 import com.github.noamm9.utils.MathUtils
 import com.github.noamm9.utils.PlayerUtils
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import com.github.noamm9.utils.location.LocationUtils
+import com.github.noamm9.utils.location.WorldType
+import gg.essential.universal.UMinecraft
+import kotlinx.coroutines.*
 import net.minecraft.client.KeyMapping
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket
 import net.minecraft.network.protocol.game.ClientboundSoundPacket
@@ -52,9 +50,10 @@ object DancingSquared : Feature("Automatically completes the Dance Room puzzle")
 
     override fun init() {
         register<TickEvent.Start> {
-            val y = mc.player?.blockPosition()?.y
+            val player = mc.player
             val wasInMirrorverse = inMirrorverse
-            inMirrorverse = y != null && y in 32..<36
+            inMirrorverse = LocationUtils.world == WorldType.Rift && player != null &&
+                    player.y >= 32 && player.y < 36 && player.x in -266.0..-260.0 && player.z in -109.0..-103.0
             if (!inMirrorverse) setInactive()
 
             if (inMirrorverse != wasInMirrorverse && debug) {
@@ -62,17 +61,18 @@ object DancingSquared : Feature("Automatically completes the Dance Room puzzle")
             }
         }
 
-        register<PacketEvent.Received> {
+        register<MainThreadPacketReceivedEvent.Post> {
             val packet = event.packet as? ClientboundSetSubtitleTextPacket ?: return@register
-            mc.execute {
-                if (!enabled) return@execute
-                val text = packet.text.unformattedText
-                if (debug) ChatUtils.chat("[DancingSquared] Subtitle received: $text (InMirrorverse: $inMirrorverse)")
+            val text = packet.text.unformattedText
+            if (debug) ChatUtils.chat("[DancingSquared] Subtitle received: $text (InMirrorverse: $inMirrorverse)")
 
-                if (inMirrorverse && !isActive && text.contains("Move!", ignoreCase = true)) {
-                    ChatUtils.modMessage("&bDance Room &7» &aEnabled via Subtitle!")
-                    setActive()
-                }
+            if (inMirrorverse && !isActive && UMinecraft.currentScreenObj == null && mc.isWindowActive && text.contains(
+                    "Move!",
+                    ignoreCase = true
+                )
+            ) {
+                ChatUtils.modMessage("&bDance Room &7» &aEnabled via Subtitle!")
+                setActive()
             }
         }
 
@@ -83,11 +83,8 @@ object DancingSquared : Feature("Automatically completes the Dance Room puzzle")
 
             val segment = segments[seg]
             val playerPos = if (segment.axis == "x") player.x else player.z
-            val (low, high) = if (segment.target >= 0) {
-                segment.target to segment.target + 1.0
-            } else {
-                segment.target - 1.0 to segment.target
-            }
+            val low = if (segment.target >= 0) segment.target else segment.target - 1.0
+            val high = if (segment.target >= 0) segment.target + 1.0 else segment.target
             if (playerPos !in low..high) return@register
 
             key.isDown = false
@@ -95,30 +92,28 @@ object DancingSquared : Feature("Automatically completes the Dance Room puzzle")
             seg = (seg + 1) % segments.size
         }
 
-        register<PacketEvent.Received> {
+        register<MainThreadPacketReceivedEvent.Post> {
             val packet = event.packet as? ClientboundSoundPacket ?: return@register
-            mc.execute {
-                if (!enabled || !inMirrorverse || !isActive) return@execute
-                val name = packet.sound.value().location.toString()
+            if (!inMirrorverse || !isActive) return@register
+            val name = packet.sound.value().location.toString()
 
-                if (name.contains("burp") || name.contains("villager.no")) {
-                    ChatUtils.modMessage("&bDance Room &7» &cFailed!")
+            if (name.contains("burp") || name.contains("villager.no")) {
+                ChatUtils.modMessage("&bDance Room &7» &cFailed!")
+                setInactive()
+                return@register
+            }
+
+            if (name.contains("note_block.bass")) {
+                val isBeat = pitchList.any { abs(it - packet.pitch) < 0.01 }
+                val isComplete = abs(COMPLETE_PITCH - packet.pitch) < 0.01
+
+                if (isBeat) {
+                    beats++
+                    if (debug) ChatUtils.chat("[DancingSquared] Total beats: $beats")
+                    doMove(beats)
+                } else if (isComplete) {
+                    ChatUtils.modMessage("&bDance Room &7» &aCompleted!")
                     setInactive()
-                    return@execute
-                }
-
-                if (name.contains("note_block.bass")) {
-                    val isBeat = pitchList.any { abs(it - packet.pitch) < 0.01 }
-                    val isComplete = abs(COMPLETE_PITCH - packet.pitch) < 0.01
-
-                    if (isBeat) {
-                        beats++
-                        if (debug) ChatUtils.chat("[DancingSquared] Total beats: $beats")
-                        doMove(beats)
-                    } else if (isComplete) {
-                        ChatUtils.modMessage("&bDance Room &7» &aCompleted!")
-                        setInactive()
-                    }
                 }
             }
         }
@@ -141,9 +136,7 @@ object DancingSquared : Feature("Automatically completes the Dance Room puzzle")
         seg = 0
 
         danceScope.launch {
-            PlayerUtils.rotateSmoothly(MathUtils.Rotation(90f, 90f), 200) {
-                doMove(0)
-            }
+            PlayerUtils.rotateSmoothly(MathUtils.Rotation(90f, 90f), 200)
         }
     }
 
