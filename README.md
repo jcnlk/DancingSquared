@@ -15,7 +15,10 @@ Ultrasequencer experiments, and mouse clicking.
 <summary>Features</summary>
 
 - **Dance Room**: Completes the Dance Room sequence in the Rift Mirrorverse.
-- **AutoExperiments**: Solves the Chronomatron and Ultrasequencer experiments.
+- **AutoExperiments**: Selects, starts, and solves Chronomatron and Ultrasequencer,
+  then reopens the table for the next available experiment. Enable **Auto Start**,
+  open the Experimentation Table, and keep looking at it. The highest playable
+  stakes are selected automatically.
 - **Auto Clicker**: Adds configurable left and right click automation.
 
 </details>

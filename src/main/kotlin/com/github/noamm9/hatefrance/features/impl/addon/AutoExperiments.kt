@@ -6,18 +6,23 @@ import com.github.noamm9.event.impl.ContainerEvent
 import com.github.noamm9.event.impl.TickEvent
 import com.github.noamm9.event.impl.WorldChangeEvent
 import com.github.noamm9.features.Feature
+import com.github.noamm9.utils.ChatUtils.removeFormatting
 import com.github.noamm9.utils.GuiUtils
+import com.github.noamm9.utils.PlayerUtils
 import com.github.noamm9.utils.items.ItemUtils.hasGlint
+import com.github.noamm9.utils.items.ItemUtils.lore
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import gg.essential.universal.UMinecraft
 
 object AutoExperiments : Feature(
     name = "AutoExperiments",
-    description = "Solves Chronomatron and Ultrasequencer experiments."
+    description = "Selects, starts and solves Chronomatron and Ultrasequencer experiments."
 ) {
     private val clickDelay by SliderSetting("Click Delay", 200, 100, 1000, 10)
     private val delayVariety by SliderSetting("Delay Variety", 50, 0, 1000, 10)
+    private val autoStart by ToggleSetting("Auto Start", true)
+        .withDescription("Selects the highest available stakes and reopens the table. Keep looking at the table.")
     private val autoClose by ToggleSetting("Auto Close", true)
     private val serumCount by SliderSetting("Serum Count", 0, 0, 3, 1)
     private val getMaxXp by ToggleSetting("Get Max XP", false)
@@ -25,16 +30,24 @@ object AutoExperiments : Feature(
     private val solver = ExperimentSolver()
     private val cells = List(50) { Cell(it) }
     private var nextClickTime = 0L
+    private var reopenAt = 0L
     private var experimentScreen: AbstractContainerScreen<*>? = null
 
     override fun init() {
         register<ContainerEvent.Open> {
-            solver.open(event.screen.title.string)
-            experimentScreen = event.screen.takeIf { solver.active }
-            nextClickTime = 0L
+            reset()
+            val title = event.screen.title.string.removeFormatting()
+            solver.open(title)
+            experimentScreen = event.screen.takeIf {
+                solver.active || autoStart.value && (title == "Experimentation Table" || title == "Experiment Over" ||
+                        isStakeSelection(title, "Chronomatron") || isStakeSelection(title, "Ultrasequencer"))
+            }
+            nextClickTime = if (solver.active) 0L else System.currentTimeMillis() + delay()
         }
 
-        register<ContainerEvent.Close> { reset() }
+        register<ContainerEvent.Close> {
+            if (event.screen === experimentScreen) reset()
+        }
         register<WorldChangeEvent> { reset() }
 
         register<ContainerEvent.MouseClick> {
@@ -42,11 +55,34 @@ object AutoExperiments : Feature(
         }
 
         register<TickEvent.Start> {
-            if (!solver.active) return@register
             val currentPlayer = mc.player
-            val screen = experimentScreen
-            if (currentPlayer == null || screen == null || UMinecraft.currentScreenObj !== screen || currentPlayer.containerMenu !== screen.menu) {
+            if (currentPlayer == null) {
                 reset()
+                return@register
+            }
+            val now = System.currentTimeMillis()
+            if (reopenAt != 0L) {
+                if (!autoStart.value || UMinecraft.currentScreenObj != null) reset()
+                else if (now >= reopenAt) {
+                    reopenAt = 0L
+                    PlayerUtils.rightClick()
+                }
+                return@register
+            }
+
+            val screen = experimentScreen ?: return@register
+            if (UMinecraft.currentScreenObj !== screen || currentPlayer.containerMenu !== screen.menu) {
+                reset()
+                return@register
+            }
+
+            if (!solver.active) {
+                if (!autoStart.value || now < nextClickTime) return@register
+                if (screen.title.string.removeFormatting() == "Experiment Over") reopenTable()
+                else nextMenuClick(screen)?.let { slot ->
+                    GuiUtils.clickSlot(slot, GuiUtils.ButtonType.MIDDLE)
+                    nextClickTime = now + delay()
+                }
                 return@register
             }
 
@@ -59,15 +95,13 @@ object AutoExperiments : Feature(
                 cell.count = if (stack.isEmpty) 0 else stack.count
                 cell.foil = !stack.isEmpty && stack.hasGlint()
             }
-            val now = System.currentTimeMillis()
             solver.nextClick(cells, now >= nextClickTime)?.let { slot ->
                 GuiUtils.clickSlot(slot, GuiUtils.ButtonType.MIDDLE)
                 nextClickTime = now + delay()
             }
 
             if (autoClose.value && solver.shouldClose(cells, chronomatronTarget(), ultrasequencerTarget())) {
-                currentPlayer.closeContainer()
-                reset()
+                reopenTable()
             }
         }
     }
@@ -80,8 +114,48 @@ object AutoExperiments : Feature(
     private fun reset() {
         solver.close()
         nextClickTime = 0L
+        reopenAt = 0L
         experimentScreen = null
     }
+
+    private fun reopenTable() {
+        reset()
+        mc.player?.closeContainer()
+        if (autoStart.value) reopenAt = System.currentTimeMillis() + delay()
+    }
+
+    private fun nextMenuClick(screen: AbstractContainerScreen<*>): Int? {
+        val title = screen.title.string.removeFormatting()
+        val slots = screen.menu.slots
+        if (title == "Experimentation Table") {
+            if (slots.getOrNull(22)?.item?.lore?.any { it.removeFormatting().contains("Experiments on cooldown!") } == true) return null
+            for ((statusSlot, startSlot) in listOf(21 to 29, 23 to 33)) {
+                val item = slots.getOrNull(statusSlot)?.item ?: return null
+                if (item.isEmpty) return null
+                val lore = item.lore.map { it.removeFormatting() }
+                if (lore.isEmpty()) return null
+                if (lore.none { it.contains("Experiment completed") || it.contains("Add-on locked!") }) {
+                    return startSlot.takeIf { slots.getOrNull(it)?.hasItem() == true }
+                }
+            }
+            return null
+        }
+
+        val stakes = when {
+            isStakeSelection(title, "Chronomatron") -> 24 downTo 20
+            isStakeSelection(title, "Ultrasequencer") -> 23 downTo 21
+            else -> return null
+        }
+        return stakes.firstOrNull { slot ->
+            val item = slots.getOrNull(slot)?.item ?: return@firstOrNull false
+            val lore = item.lore.map { it.removeFormatting() }
+            !item.isEmpty && lore.isNotEmpty() && lore.none {
+                it.contains("Enchanting level too low!") || it.contains("Not enough experience!")
+            }
+        }
+    }
+
+    private fun isStakeSelection(title: String, game: String) = title.startsWith(game) && title.endsWith("Stakes")
 
     private fun delay(): Long {
         val variety = if (delayVariety.value == 0) 0 else (0..delayVariety.value).random()
