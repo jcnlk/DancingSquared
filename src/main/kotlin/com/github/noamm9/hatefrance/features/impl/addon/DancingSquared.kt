@@ -63,6 +63,7 @@ object DancingSquared : Feature("Automatically completes the Dance Room puzzle")
 
         register<MainThreadPacketReceivedEvent.Post> {
             val packet = event.packet as? ClientboundSetSubtitleTextPacket ?: return@register
+            if (!inMirrorverse && !debug) return@register
             val text = packet.text.unformattedText
             if (debug) ChatUtils.chat("[DancingSquared] Subtitle received: $text (InMirrorverse: $inMirrorverse)")
 

@@ -231,14 +231,16 @@ object AutoClicker : Feature(
     private fun shouldClick(isLeft: Boolean): Boolean {
         if (currentScreen != null || !mc.isWindowActive) return false
         val stack = mc.player?.mainHandItem ?: return false
-        if (blockDungeonBreaker.value && stack.skyblockId == "DUNGEONBREAKER") {
+        val skyblockId = if (blockDungeonBreaker.value) stack.skyblockId else null
+        if (skyblockId == "DUNGEONBREAKER") {
             return false
         }
 
         if (!favouriteItems.value) return true
         if (stack.isEmpty) return false
         val values = whitelistValues(if (isLeft) favLeft else favRight)
-        return stack.itemUUID in values || stack.skyblockId in values || stack.hoverName.string in values
+        if (values.isEmpty()) return false
+        return stack.itemUUID in values || (skyblockId ?: stack.skyblockId) in values || stack.hoverName.string in values
     }
 
     private fun isHeld(keybind: KeybindSetting): Boolean {
