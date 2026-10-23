@@ -134,14 +134,16 @@ object AutoExperiments : Feature(
     private fun nextMenuClick(screen: AbstractContainerScreen<*>): Int? {
         val title = screen.title.string.removeFormatting()
         val slots = screen.menu.slots
+        fun tooltip(slot: Int) = slots.getOrNull(slot)?.item?.takeUnless { it.isEmpty }?.let { item ->
+            listOf(item.hoverName.string) + item.lore
+        }.orEmpty()
+
         if (title == "Experimentation Table") {
-            if (slots.getOrNull(22)?.item?.lore?.any { it.removeFormatting().contains("Experiments on cooldown!") } == true) return null
+            if (tooltip(22).any { it.removeFormatting().contains("on cooldown", ignoreCase = true) }) return null
             for ((statusSlot, startSlot) in experimentSlots) {
-                val item = slots.getOrNull(statusSlot)?.item ?: return null
-                if (item.isEmpty) return null
-                val lore = item.lore
-                if (lore.isEmpty()) return null
-                if (lore.none {
+                val status = tooltip(statusSlot)
+                if (status.isEmpty()) continue
+                if (status.none {
                         val line = it.removeFormatting()
                         line.contains("Experiment completed") || line.contains("Add-on locked!")
                     }) {
@@ -157,9 +159,8 @@ object AutoExperiments : Feature(
             else -> return null
         }
         return stakes.firstOrNull { slot ->
-            val item = slots.getOrNull(slot)?.item ?: return@firstOrNull false
-            val lore = item.lore
-            !item.isEmpty && lore.isNotEmpty() && lore.none {
+            val lore = tooltip(slot)
+            lore.isNotEmpty() && lore.none {
                 val line = it.removeFormatting()
                 line.contains("Enchanting level too low!") || line.contains("Not enough experience!")
             }
