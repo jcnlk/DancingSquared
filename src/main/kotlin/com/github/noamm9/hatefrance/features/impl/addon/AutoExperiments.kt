@@ -14,6 +14,8 @@ import com.github.noamm9.utils.items.ItemUtils.lore
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import gg.essential.universal.UMinecraft
+import net.minecraft.world.item.Item
+import java.util.IdentityHashMap
 
 object AutoExperiments : Feature(
     name = "AutoExperiments",
@@ -29,6 +31,8 @@ object AutoExperiments : Feature(
 
     private val solver = ExperimentSolver()
     private val cells = List(50) { Cell(it) }
+    private val itemIds = IdentityHashMap<Item, String>()
+    private val experimentSlots = listOf(21 to 29, 23 to 33)
     private var nextClickTime = 0L
     private var reopenAt = 0L
     private var experimentScreen: AbstractContainerScreen<*>? = null
@@ -55,6 +59,7 @@ object AutoExperiments : Feature(
         }
 
         register<TickEvent.Start> {
+            if (experimentScreen == null && reopenAt == 0L) return@register
             val currentPlayer = mc.player
             if (currentPlayer == null) {
                 reset()
@@ -91,7 +96,9 @@ object AutoExperiments : Feature(
             for (i in 9..49) {
                 val stack = slots[i].item
                 val cell = cells[i]
-                cell.itemId = if (stack.isEmpty) "" else BuiltInRegistries.ITEM.getKey(stack.item).toString()
+                cell.itemId = if (stack.isEmpty) "" else itemIds.getOrPut(stack.item) {
+                    BuiltInRegistries.ITEM.getKey(stack.item).toString()
+                }
                 cell.count = if (stack.isEmpty) 0 else stack.count
                 cell.foil = !stack.isEmpty && stack.hasGlint()
             }
@@ -129,12 +136,15 @@ object AutoExperiments : Feature(
         val slots = screen.menu.slots
         if (title == "Experimentation Table") {
             if (slots.getOrNull(22)?.item?.lore?.any { it.removeFormatting().contains("Experiments on cooldown!") } == true) return null
-            for ((statusSlot, startSlot) in listOf(21 to 29, 23 to 33)) {
+            for ((statusSlot, startSlot) in experimentSlots) {
                 val item = slots.getOrNull(statusSlot)?.item ?: return null
                 if (item.isEmpty) return null
-                val lore = item.lore.map { it.removeFormatting() }
+                val lore = item.lore
                 if (lore.isEmpty()) return null
-                if (lore.none { it.contains("Experiment completed") || it.contains("Add-on locked!") }) {
+                if (lore.none {
+                        val line = it.removeFormatting()
+                        line.contains("Experiment completed") || line.contains("Add-on locked!")
+                    }) {
                     return startSlot.takeIf { slots.getOrNull(it)?.hasItem() == true }
                 }
             }
@@ -148,9 +158,10 @@ object AutoExperiments : Feature(
         }
         return stakes.firstOrNull { slot ->
             val item = slots.getOrNull(slot)?.item ?: return@firstOrNull false
-            val lore = item.lore.map { it.removeFormatting() }
+            val lore = item.lore
             !item.isEmpty && lore.isNotEmpty() && lore.none {
-                it.contains("Enchanting level too low!") || it.contains("Not enough experience!")
+                val line = it.removeFormatting()
+                line.contains("Enchanting level too low!") || line.contains("Not enough experience!")
             }
         }
     }

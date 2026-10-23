@@ -15,7 +15,8 @@ internal class ExperimentSolver {
     private var chronoRevealSeen = false
     private var chronoIndex = 0
     private var chronoRoundComplete = false
-    private val ultrasequencer = mutableMapOf<Int, Int>()
+    private val ultrasequencer = IntArray(36) { -1 }
+    private var ultraSize = 0
     private var ultraIndex = 0
 
     val active get() = mode != Mode.NONE
@@ -46,7 +47,7 @@ internal class ExperimentSolver {
         return when (mode) {
             Mode.CHRONOMATRON -> chronoRoundComplete && chronomatron.size > chronoTarget
             Mode.ULTRASEQUENCER -> cell(cells)?.itemId == "minecraft:clock" &&
-                    ultraIndex >= ultrasequencer.size && ultrasequencer.size >= ultraTarget
+                    ultraIndex >= ultraSize && ultraSize >= ultraTarget
 
             Mode.NONE -> false
         }
@@ -76,20 +77,27 @@ internal class ExperimentSolver {
     private fun nextUltrasequencer(cells: List<Cell>, canClick: Boolean): Int? {
         val control = cell(cells)?.itemId ?: return null
         if (control == "minecraft:glowstone") {
-            ultrasequencer.clear()
+            clearUltrasequencer()
             for (cell in cells) {
                 if (cell.slot !in 9..44 || !isSequenceItem(cell)) continue
-                if (cell.count !in 1..36 || ultrasequencer.put(cell.count - 1, cell.slot) != null) {
-                    ultrasequencer.clear()
+                if (cell.count !in 1..36 || ultrasequencer[cell.count - 1] != -1) {
+                    clearUltrasequencer()
                     break
                 }
+                ultrasequencer[cell.count - 1] = cell.slot
+                ultraSize++
             }
-            if ((0 until ultrasequencer.size).any { it !in ultrasequencer }) ultrasequencer.clear()
+            if ((0 until ultraSize).any { ultrasequencer[it] == -1 }) clearUltrasequencer()
             ultraIndex = 0
             return null
         }
-        if (control != "minecraft:clock" || !canClick) return null
-        return ultrasequencer[ultraIndex]?.also { ultraIndex++ }
+        if (control != "minecraft:clock" || !canClick || ultraIndex >= ultraSize) return null
+        return ultrasequencer[ultraIndex].also { ultraIndex++ }
+    }
+
+    private fun clearUltrasequencer() {
+        ultrasequencer.fill(-1)
+        ultraSize = 0
     }
 
     private fun clear() {
@@ -97,7 +105,7 @@ internal class ExperimentSolver {
         chronoRevealSeen = false
         chronoIndex = 0
         chronoRoundComplete = false
-        ultrasequencer.clear()
+        clearUltrasequencer()
         ultraIndex = 0
     }
 
